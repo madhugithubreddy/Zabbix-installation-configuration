@@ -1,0 +1,116 @@
+---------------------------------INSTALL & CONFIGURATION OF ZABBIX SERVER-----------------------------------
+https://www.devopsschool.com/blog/install-configure-zabbix-server-in-ubuntu/
+
+  Platform & Component
+Ubuntu Version: 20:04
+Zabbix Version: 6.0 LTS
+Database: MySQL
+Web Server: Apache
+
+Prerequisite:
+
+HOW TO INSTALL MYSQL SERVER AND CLIENT ON UBUNTU?
+ Step 1 — Installing MySQL
+To install it, update the package index on your server if you’ve not done so recently:
+$sudo apt update
+
+Then install the mysql-server package:
+$ sudo apt install mysql-server
+
+Ensure that the server is running using the systemctl start command:
+$ sudo systemctl start mysql.service
+
+$ mysql
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password by 'DevOpsSchool$123';
+mysql> exit
+
+Step 2 — Configuring MySQL – NOT WORKING WITH LATEST
+For fresh installations of MySQL, you’ll want to run the DBMS’s included security script. This script changes some of the less secure default options for things like remote root logins and sample users.
+
+Step 3
+For fresh installations of MySQL, you’ll want to run the DBMS’s included security script. This script changes some of the less secure default options for things like remote root logins and sample users.
+
+Run the security script with sudo:
+$ sudo mysql_secure_installation
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+THE STEP 4 IS NOT MUCH NEEDED TO DO. IF YOU ARE INTERESTED YOU CAN DO IT ORELSE LEAVE IT.
+
+Step 4 — Creating a Dedicated MySQL User and Granting Privileges
+
+$ mysql -u root -p
+
+$ CREATE USER 'daggula'@'localhost' IDENTIFIED BY 'DevOpsSchool$123';
+$ GRANT ALL PRIVILEGES ON *.* TO 'daggula'@'localhost' WITH GRANT OPTION;
+$ FLUSH PRIVILEGES;
+$ exit
+$ mysql -u daggula -p
+
+# OPTIONAL Only for Reference
+$ CREATE USER 'daggula'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+$ ALTER USER 'daggula'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+$ GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on *.* TO 'daggula'@'localhost' WITH GRANT OPTION;
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+NOW CLEAR THE SCREEN AND RUN THE FOLLOWING COMMANDS FOR INSTALLATION
+
+Step 1 – Install Zabbix repository
+
+# sudo -s [ Become a root user ]
+# wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-4+ubuntu20.04_all.deb
+# dpkg -i zabbix-release_6.0-4+ubuntu20.04_all.deb
+# apt-get update
+
+Step 2 – Install Zabbix server, frontend, agent
+
+# apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+
+Step 3 – Create initial database
+Make sure you have database server up and running.
+Run the following on your database host.
+
+# mysql -uroot -p
+password:DevOpsSchool$123
+mysql> create database zabbix character set utf8mb4 collate utf8mb4_bin;
+mysql> create user zabbix@localhost identified by 'DevOpsSchool$123';
+mysql> grant all privileges on zabbix.* to zabbix@localhost;
+mysql> set global log_bin_trust_function_creators = 1;
+mysql> quit;
+
+To check whether sql.gz is there are not run the below commands
+ 
+ls /usr/share/doc/zabbix-sql-scripts/mysql/server.sql.gz
+ls /usr/share/doc/zabbix-sql-scripts
+
+
+On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
+
+# zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
+
+Disable log_bin_trust_function_creators option after importing database schema.
+
+# mysql -uroot -p
+password
+mysql> set global log_bin_trust_function_creators = 0;
+mysql> quit;
+
+
+Step 4 – Configure the database for Zabbix server
+Edit file /etc/zabbix/zabbix_server.conf
+
+# ls /etc/zabbix/
+vi /etc/zabbix/zabbix_server.conf
+
+go into this file and enter instert for -- i
+add the DBpassword Name:DevOpsSchool$123
+and save it esc->:wq!
+
+Step 5 – Start Zabbix server and agent processes
+
+Start Zabbix server and agent processes and make it start at system boot.
+
+# systemctl restart zabbix-server zabbix-agent apache2
+# systemctl enable zabbix-server zabbix-agent apache2
+# systemctl status zabbix-server zabbix-agent apache2
+
+Step 6 – Configure Zabbix frontend
+Connect to your newly installed Zabbix frontend: http://server_ip_or_name/zabbix
