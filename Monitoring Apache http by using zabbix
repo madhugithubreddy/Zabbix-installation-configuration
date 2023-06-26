@@ -1,0 +1,66 @@
+Platform & Component
+RHEL-9.2.0_HVM-20230503-x86_64-41-Hourly2-GP2
+Zabbix Version: 6.0 LTS
+Web Server: Apache
+
+Install & configure Apache HTTPD server in Centos/Redhat 9
+
+$sudo -s
+#yum -y update
+#yum install httpd
+#systemctl start httpd
+#systemctl enable httpd
+#systemctl status httpd
+
+Setup website in default virtual host
+
+#vi /var/www/html/index.html
+
+<html>
+<head>
+  <title> CentOs/Redhat rocks! </title>
+</head>
+<body>
+  <p> I'm running this website on an Centos/Redhat Server server!
+</body>
+</html>
+
+Enable mod_status in Apache HTTP
+
+What is mod_status?
+mod_status is an Apache module that helps to monitor web server load and current httpd connections with an HTML interface that can be accessed via a web browser.
+
+Apache’s mod_status shows a plain HTML page containing the information about current statistics of the webserver including.
+
+Total number of incoming requests
+Total number of bytes and counts server
+The CPU usage of Webserver
+Server Load
+Server Uptime
+Total Traffic
+Total number of idle workers
+PIDs with the respective clients and many more.
+The default Apache Project enabled their server statistics page to the general public. 
+
+sudo vi /etc/httpd/conf/httpd.conf
+
+DocumentRoot "/var/www/html"
+
+LoadModule status_module modules/mod_status.so
+<Location /server-status>
+   SetHandler server-status
+   Order deny,allow
+   Deny from all
+   Allow from all
+   Allow from 172.31.47.194
+</Location>
+ExtendedStatus On
+
+httpd -t
+#sudo systemctl restart httpd
+#curl http://localhost/server-status
+#curl http://localhost/server-status/?refresh=5
+
+
+Test Apache HTTP Server on CentOS 9
+$ watch curl http://SERVER_DOMAIN_NAME_OR_IP
