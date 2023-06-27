@@ -1,0 +1,153 @@
+------------------------------------------------How to Monitor Nginx by using Zabbix?-----------------------------------------------
+
+There are 2 default template has been given by Zabbix which can be used to Nginx metrices monitoring
+
+Nginx by HTTP
+Nginx by Zabbix agent
+
+Zabbix Template – Nginx by HTTP
+For Zabbix version: 6.0 and higher. The template to monitor Nginx by Zabbix that work without any external scripts. Most of the metrics are collected in one go, thanks to Zabbix bulk data collection. Template Nginx by HTTP collects metrics by polling ngx_http_stub_status_module with HTTP agent remotely. Note that this solution supports https and redirects.
+
+URL – https://www.zabbix.com/integrations/nginx#nginx_http
+
+Zabbix Template – Nginx by Zabbix agent
+For Zabbix version: 6.0 and higher. The template to monitor Nginx by Zabbix that work without any external scripts. Most of the metrics are collected in one go, thanks to Zabbix bulk data collection. Template Nginx by Zabbix agent collects metrics by polling ngx_http_stub_status_module locally with Zabbix agent. It also uses Zabbix agent to collect nginx Linux process stats like CPU usage, memory usage and whether process is running or not.
+
+URL – https://www.zabbix.com/integrations/nginx#nginx_agent
+
+How to install and configure nginx in Ubuntu?
+
+Step 1: Update Software Repositories
+$ sudo apt-get update
+
+Step 2: Install Nginx From Ubuntu Repositories
+Nginx is included in the Ubuntu 20.04 default repositories. Install it by entering the following command:
+$ sudo apt-get install nginx
+
+Step 3: Verify the Installation
+Verify that Nginx installed correctly by checking the software version. Enter the following:
+$ nginx -v
+
+Step 4: Controlling the Nginx Service
+Start by checking the status of the Nginx service:
+$ sudo systemctl status nginx
+$ sudo systemctl start nginx
+$ sudo systemctl enable nginx
+$ sudo systemctl stop nginx
+$ sudo systemctl disable nginx
+$ sudo systemctl reload nginx
+$ sudo systemctl restart nginx
+
+Step 5: Allow Nginx Traffic
+# Start by displaying the available Nginx profiles:
+$ sudo ufw app list
+
+# To grant Nginx access through the default Ubuntu firewall, enter the following:
+$ sudo ufw allow 'nginx http'
+
+# Refresh the firewall settings by entering
+$ sudo ufw reload
+
+# For encrypted (https) traffic, enter:
+$ sudo ufw allow 'nginx https'
+
+# To allow both, enter:
+$ sudo ufw allow 'nginx full'
+
+Step 6: Test Nginx
+Make sure that the Nginx service is running, as in Step 4. Open a web browser, and navigate to the following web address:
+
+http://127.0.0.1
+
+$ sudo apt-get install curl
+$ curl –i 127.0.0.1
+
+Step 7: Configure a Server Block (Optional)
+In Nginx, a server block is a configuration that works as its own server. By default, Nginx has one server block preconfigured.
+
+It is located at /var/www/html.
+
+
+vi /var/www/html/index.html
+
+In the text editor, enter the following HTML code:
+
+<html>
+   <head>
+      <title>Welcome to test_domain.com!</title>
+   </head>
+   <body>
+      <h1>This message confirms that your Nginx server block is working. Great work!</h1>
+   </body>
+</html>
+
+
+Important Nginx File Locations
+By default, Nginx stores different configuration and log files in the following locations:
+
+/var/www/html – Website content as seen by visitors.
+/etc/nginx – Location of the main Nginx application files.
+/etc/nginx/nginx.conf – The main Nginx configuration file.
+/etc/nginx/sites-available – List of all websites configured through Nginx.
+/etc/nginx/sites-enabled – List of websites actively being served by Nginx.
+/var/log/nginx/access.log – Access logs tracking every request to your server.
+/var/log/ngins/error.log – A log of any errors generated in Nginx.
+Reference
+
+https://phoenixnap.com/kb/how-to-install-nginx-on-ubuntu-20-04
+
+How to enable “ngx_http_stub_status_module” in Nginx for Nginx metrices?
+
+Step 1 – Enable “ngx_http_stub_status_module” in Nginx
+If you use open source NGINX, your instances may lack the stub status module. Verify that your nginx binary includes the module before proceeding to Configuration:
+
+$ nginx -V 2>&1| grep -o http_stub_status_module
+http_stub_status_module
+
+If the command output does not include http_stub_status_module, you must install an NGINX package that includes the module.
+
+Step 2 – Configure and Verify a Nginx metrices at http://localhost:81/nginx_status
+On each NGINX server, create a status.conf file in the directory that contains your other NGINX configuration files, such as /etc/nginx/conf.d/.
+vi /etc/nginx/conf.d/status.conf
+
+server {
+  listen 81;
+  server_name localhost;
+
+  access_log off;
+  allow 127.0.0.1;
+  # deny all;
+  allow 172.31.34.37;
+  allow 13.234.113.121;
+
+  location /nginx_status {
+    # Choose your status module
+
+    # freely available with open source NGINX
+    stub_status;
+
+    # for open source NGINX < version 1.18.0
+    # stub_status on;
+
+    # available only with NGINX Plus
+    # status;
+
+    # ensures the version information can be retrieved
+    server_tokens on;
+  }
+}
+
+$ sudo systemctl restart nginx
+$ sudo systemctl status nginx
+
+BROWSER - http://3.110.105.162:81/nginx_status
+Inside a Server - curl http://127.0.0.1:81/nginx_status
+
+
+IN the Zabbix server frontend, GOTO Configuration--->Hosts-->create Hosts--->|
+                                                                             Name-Nginx-->|
+																			               Templates-Nginx by HTTP-->|
+																						                             Group-Virtual Machine-->|
+																													                         Interface- enter your nginx public ip-13.234.113.121|
+																																			                                                                 |
+Name-nginx-Apply<--Latest Data<--Goto Monitoring---Now Add<---change nginx_status and port number as 81<---Inherited and Host macros<--Macros<-----																																														
