@@ -1,10 +1,22 @@
 ---------------------------------------How to configure Zabbix Linux Agent with SNMP protocol?---------------------------------------------------
+####pre-requisites###
+ubuntu 20.04(focal)
+t2 micro
+volume 1*30
+security group: allow all
+
 First, we are going to configure the system to use the correct date and time using NTP.
 How to configure Zabbix Linux Agent with SNMP protocol?
+$sudo -s
+#cd 
+root@ip-172-31-11-222:~#
 
 On the Linux console, use the following commands to set the correct timezone.
 # dpkg-reconfigure tzdata
 
+----ASIA----ENTER
+            ||
+	     -------KOLKATTA--ENTER
 Install the Ntpdate package and set the correct date and time immediately.
 # apt-get update
 # apt-get install ntpdate
